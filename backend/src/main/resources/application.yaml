@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: backend
+  datasource:
+    url: jdbc:postgresql://localhost:5432/challenge_api
+    username: postgres
+    password: backend
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database: postgresql
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

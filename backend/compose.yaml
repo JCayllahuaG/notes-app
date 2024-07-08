@@ -1,0 +1,9 @@
+services:
+  postgres:
+    image: 'postgres:latest'
+    environment:
+      - 'POSTGRES_DB=challenge_api'
+      - 'POSTGRES_PASSWORD=backend'
+      - 'POSTGRES_USER=postgres'
+    ports:
+      - '5432:5432'
