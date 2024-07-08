@@ -5,8 +5,8 @@ import { NoteService } from '../services/note-api.service';
 import { CategoryService } from '../services/category-api.service';
 import { ref, computed } from 'vue';
 import { NoteWatch, TagDialogMode } from '../utilities/enums';
-import type { Category } from '../model/Category';
 import { onMounted } from 'vue';
+import { Category } from '../model/Category';
 
 //services
 const noteService = new NoteService();
@@ -42,19 +42,78 @@ onMounted(() => {
 const fetchCategories = async () => {
   await categoryService.getCategories().then((res) => {
     categoryArray.value = res.data as Category[];
-    console.log(categoryArray.value);
   });
+};
+const updateCategories = (categories: Category[]) => {
+  let deletedCategories: Category[] = [];
+  let addedCategories: Category[] = [];
+
+  //Extract the categories that are deleted from the note categories
+  deletedCategories = activeNote.value?.categories.filter(
+    (category) => !categories.some((c) => c.id === category.id)
+  ) as Category[];
+
+  //Extract the categories that are added to the note categories
+  addedCategories = categories.filter(
+    (category) => !activeNote.value?.categories.some((c) => c.id === category.id)
+  ) as Category[];
+
+  if (deletedCategories.length > 0) {
+    deletedCategories.forEach(async (category) => {
+      await removeCategory(category);
+    });
+  }
+  if (addedCategories.length > 0) {
+    addedCategories.forEach(async (category) => {
+      await assignCategory(category);
+    });
+  }
+
+  const index = noteArray.value.findIndex((note) => note.id === activeNote.value!.id);
+  if (index !== -1) noteArray.value[index].categories = categories;
+};
+
+const addCategory = async (category: Category) => {
+  console.log('Creating: ', category);
+
+  await categoryService
+    .create(category)
+    .then((response) => {
+      console.log('Created: ', response.data);
+      categoryArray.value.push(response.data as Category);
+    })
+    .catch((err) => {
+      console.error(err);
+      categoryArray.value.pop();
+    });
 };
 
 //Note Management
 
 //Requests
+const assignCategory = async (category: Category) => {
+  await noteService
+    .addCategory(activeNote.value!.id, category.id)
+    .then(() => {})
+    .catch((err) => {
+      console.error(err);
+    });
+};
+const removeCategory = async (category: Category) => {
+  await noteService
+    .removeCategory(activeNote.value!.id, category.id)
+    .then(() => {})
+    .catch((err) => {
+      console.error(err);
+    });
+};
+
 const addNote = async (note: Note) => {
+  console.log('Creating note', note);
   await noteService
     .create(note)
     .then((response) => {
       noteArray.value.push(response.data as Note);
-      console.log(noteArray.value);
     })
     .catch((err) => {
       console.error(err);
@@ -64,7 +123,6 @@ const addNote = async (note: Note) => {
 const fetchNotes = async () => {
   await noteService.getNotes().then((res) => {
     noteArray.value = res.data as Note[];
-    console.log('Notes fetched: ', noteArray.value);
   });
 };
 const updateNote = (updatedNote: Note) => {
@@ -73,9 +131,7 @@ const updateNote = (updatedNote: Note) => {
     const originalNote = noteArray.value[index];
     noteArray.value[index] = { ...updatedNote };
     try {
-      noteService.update(updatedNote.id, updatedNote).then((response) => {
-        console.log(response);
-      });
+      noteService.update(updatedNote.id, updatedNote);
     } catch (error) {
       console.error('Error updating note:', error);
       noteArray.value[index] = originalNote;
@@ -87,9 +143,7 @@ const deleteNote = async (id: number) => {
   try {
     noteArray.value = noteArray.value.filter((n) => n.id !== id);
 
-    await noteService.delete(id).then((response) => {
-      console.log(response);
-    });
+    await noteService.delete(id);
   } catch (error) {
     console.error('Error deleting note:', error);
     noteArray.value = originalNotes;
@@ -98,9 +152,7 @@ const deleteNote = async (id: number) => {
 const archiveNote = async (id: number) => {
   try {
     noteArray.value.find((n) => n.id === id)!.archived = true;
-    await noteService.archiveNote(id).then((response) => {
-      console.log(response);
-    });
+    await noteService.archiveNote(id);
   } catch (error) {
     console.error('Error archiving note:', error);
     noteArray.value.find((n) => n.id === id)!.archived = false;
@@ -109,9 +161,7 @@ const archiveNote = async (id: number) => {
 const unarchiveNote = async (id: number) => {
   try {
     noteArray.value.find((n) => n.id === id)!.archived = false;
-    await noteService.unarchiveNote(id).then((response) => {
-      console.log(response);
-    });
+    await noteService.unarchiveNote(id);
   } catch (error) {
     console.error('Error archiving note:', error);
     noteArray.value.find((n) => n.id === id)!.archived = true;
@@ -123,15 +173,21 @@ const setActiveNote = (note: Note) => {
   mode.value = 'edit';
   dialogVisible.value = true;
 };
+
 const startCreation = () => {
   activeNote.value = new Note('', '');
   mode.value = 'create';
   dialogVisible.value = true;
 };
 
-const showCategories = (mode: TagDialogMode) => {
+const showCategories = (mode: TagDialogMode): void => {
   tagsDialogMode.value = mode;
   tagsDialogVisible.value = true;
+};
+
+const tagNote = (note: Note) => {
+  activeNote.value = note;
+  showCategories(TagDialogMode.ASSIGN);
 };
 
 //Filters
@@ -176,7 +232,7 @@ const changeVisionMode = (note: NoteWatch) => {
 </script>
 
 <template>
-  <main class="w-1/2 p-5 space-y-5 h-fit flex flex-col items-center">
+  <main class="w-1/2 p-5 space-y-5 h-full flex flex-col items-center">
     <h1>My Notes</h1>
     <div class="flex justify-between lg:w-2/3 md:2/3 w-full items-center gap-2">
       <div class="w-4/5">
@@ -279,7 +335,7 @@ const changeVisionMode = (note: NoteWatch) => {
         </div>
       </div>
     </Transition>
-    <div class="flex justify-between lg:w-2/3 md:2/3 w-full items-center">
+    <div class="flex justify-between lg:w-90 md:w-2/3 w-full items-center">
       <label
         for="everything"
         class="rounded-l option"
@@ -309,11 +365,15 @@ const changeVisionMode = (note: NoteWatch) => {
       </label>
     </div>
 
-    <div v-if="filteredNotes.length !== 0" class="lg:w-2/3 md:2/3 w-full flex flex-col gap-3">
+    <div
+      v-if="filteredNotes.length !== 0"
+      class="lg:w-2/3 md:2/3 w-full h-5/6 flex flex-col gap-3 overflow-y-auto"
+    >
       <note-card
         v-for="note in filteredNotes"
         :key="note.id"
         :note="note"
+        @tags="tagNote"
         @click-note="setActiveNote"
         @delete-note="deleteNote"
         @archive-note="archiveNote"
@@ -324,25 +384,30 @@ const changeVisionMode = (note: NoteWatch) => {
       <span class="self-center">No notes found :(</span>
     </div>
   </main>
-
-  <note-dialog
-    v-if="dialogVisible"
-    :visible="dialogVisible"
-    :note="activeNote"
-    :mode="mode"
-    @save-note="addNote"
-    @close="dialogVisible = false"
-    @update-note="updateNote"
-  />
-  <tag-dialog
-    v-if="tagsDialogVisible"
-    :tags="categoryArray"
-    @close="tagsDialogVisible = false"
-    :visible="tagsDialogVisible"
-    :mode="tagsDialogMode"
-    :selectedTags="activeNote?.categories || []"
-  >
-  </tag-dialog>
+  <Transition name="dialog">
+    <note-dialog
+      v-if="dialogVisible"
+      :visible="dialogVisible"
+      :note="activeNote"
+      :mode="mode"
+      @save-note="addNote"
+      @close="dialogVisible = false"
+      @update-note="updateNote"
+    />
+  </Transition>
+  <Transition name="dialog">
+    <tag-dialog
+      v-if="tagsDialogVisible"
+      :tags="categoryArray"
+      @close="tagsDialogVisible = false"
+      @update-tags="updateCategories"
+      @create-tag="addCategory"
+      :visible="tagsDialogVisible"
+      :mode="tagsDialogMode"
+      :selectedTags="activeNote?.categories || []"
+    >
+    </tag-dialog>
+  </Transition>
 </template>
 <style scoped>
 .option {
@@ -354,6 +419,16 @@ const changeVisionMode = (note: NoteWatch) => {
 .active {
   @apply bg-blue-500 text-white transition-all duration-200 ease-in;
 }
+.dialog-enter-from,
+.dialog-enter-active,
+.dialog-enter-to {
+  @apply animate-zoom-in animate-duration-300;
+}
+.dialog-leave-from,
+.dialog-leave-active,
+.dialog-leave-to {
+  @apply animate-zoom-out animate-duration-300;
+}
 
 .categories-enter-from,
 .categories-enter-active,
@@ -364,5 +439,18 @@ const changeVisionMode = (note: NoteWatch) => {
 .categories-leave-active,
 .categories-leave-to {
   @apply animate-slide-out-top animate-duration-300 animate-linear;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #525252;
 }
 </style>
