@@ -31,6 +31,7 @@ const unarchiveNote = () => {
         :key="category.id"
         :text="category.name"
         :color="category.color"
+        :active="false"
       ></chip-category>
     </div>
 

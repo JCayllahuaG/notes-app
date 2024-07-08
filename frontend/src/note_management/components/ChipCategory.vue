@@ -3,6 +3,7 @@ import { defineProps, ref } from 'vue';
 let props = defineProps<{
   text: string;
   color: string;
+  active: boolean;
 }>();
 
 let color = ref(props.color);
@@ -20,9 +21,12 @@ const convertHexToRGBA = (hexCode: string, opacity: number) => {
 </script>
 <template>
   <div
-    class="w-fit h-7 mt-2 items-center border rounded-lg py-1.5 px-3 font-sans text-xs font-semibold uppercase text-gray-200"
-    :style="{ backgroundColor: convertHexToRGBA(color, 10), borderColor: props.color }"
+    class="w-fit h-7 flex mt-2 justify-center items-center border rounded-lg py-1.5 px-3 font-sans text-xs font-semibold uppercase text-gray-200 transition-all duration-300 ease-linear"
+    :style="{
+      backgroundColor: active ? convertHexToRGBA(color, 100) : convertHexToRGBA(color, 10),
+      borderColor: props.color
+    }"
   >
-    <span>{{ props.text }}</span>
+    {{ props.text }}
   </div>
 </template>

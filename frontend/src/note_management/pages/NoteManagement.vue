@@ -4,7 +4,7 @@ import { Note } from '../model/Note';
 import { NoteService } from '../services/note-api.service';
 import { CategoryService } from '../services/category-api.service';
 import { ref, computed } from 'vue';
-import { NoteWatch } from '../utilities/enums';
+import { NoteWatch, TagDialogMode } from '../utilities/enums';
 import type { Category } from '../model/Category';
 import { onMounted } from 'vue';
 
@@ -20,11 +20,14 @@ let activeNote = ref<Note | null>(null);
 //Filters Variables
 let searchTerm = ref('');
 let mode = ref('');
-let showDropdown = ref(true);
+
 let visionMode = ref<NoteWatch>(NoteWatch.EVERYTHING);
 let filtersActive = ref<boolean>(false);
 let selectedCategoriesFilter = ref<Category[]>([]);
+
 const dialogVisible = ref(false);
+const tagsDialogVisible = ref(false);
+const tagsDialogMode = ref<TagDialogMode>(TagDialogMode.WATCH);
 
 //App Management
 //On Mounted
@@ -126,6 +129,11 @@ const startCreation = () => {
   dialogVisible.value = true;
 };
 
+const showCategories = (mode: TagDialogMode) => {
+  tagsDialogMode.value = mode;
+  tagsDialogVisible.value = true;
+};
+
 //Filters
 const filteredNotes = computed(() => {
   let filtered: Note[] = [...noteArray.value];
@@ -180,6 +188,28 @@ const changeVisionMode = (note: NoteWatch) => {
         />
       </div>
       <button
+        class="flex flex-row self-end items-center drop-shadow-md p-2 rounded-full hover:bg-gray-800 transition-colors duration-300 ease-linear"
+        title="Tags"
+        type="button"
+        @click="showCategories(TagDialogMode.WATCH)"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="size-5 hover:scale-125 transition-transform duration-300 ease-linear"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z"
+          />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" />
+        </svg>
+      </button>
+      <button
         @click="activeFilters"
         class="flex flex-row self-end items-center drop-shadow-md p-2 rounded-full hover:bg-gray-800 transition-colors duration-300 ease-linear"
         title="Show Filters"
@@ -215,7 +245,11 @@ const changeVisionMode = (note: NoteWatch) => {
           stroke="currentColor"
           class="size-5 hover:scale-125 transition-transform duration-300 ease-linear"
         >
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
+          />
         </svg>
       </button>
     </div>
@@ -245,7 +279,6 @@ const changeVisionMode = (note: NoteWatch) => {
         </div>
       </div>
     </Transition>
-
     <div class="flex justify-between lg:w-2/3 md:2/3 w-full items-center">
       <label
         for="everything"
@@ -301,6 +334,15 @@ const changeVisionMode = (note: NoteWatch) => {
     @close="dialogVisible = false"
     @update-note="updateNote"
   />
+  <tag-dialog
+    v-if="tagsDialogVisible"
+    :tags="categoryArray"
+    @close="tagsDialogVisible = false"
+    :visible="tagsDialogVisible"
+    :mode="tagsDialogMode"
+    :selectedTags="activeNote?.categories || []"
+  >
+  </tag-dialog>
 </template>
 <style scoped>
 .option {
