@@ -219,30 +219,32 @@ const changeVisionMode = (note: NoteWatch) => {
         </svg>
       </button>
     </div>
-    <div
-      v-if="filtersActive"
-      class="grid grid-flow-col auto-cols-max gap-2 h-fit lg:w-2/3 md:2/3 w-full animate-slide-in-top animate-duration-300 ease-in"
-    >
+    <Transition name="categories">
       <div
-        class="flex items-center accent-blue-500 bg-gray-800 px-2 py-1 rounded-md border"
-        :style="{
-          borderColor: category.color,
-          boxShadow: `0 0 0.2rem ${category.color}`
-        }"
-        v-for="category in categoryArray"
-        v-bind:key="category.id"
+        v-if="filtersActive"
+        class="grid grid-flow-col auto-cols-max gap-2 h-fit lg:w-2/3 md:2/3 w-full"
       >
-        <label :for="`checkbox-${category.name}`">
-          <input
-            :id="`checkbox-${category.name}`"
-            type="checkbox"
-            :checked="selectedCategoriesFilter.includes(category)"
-            @change="toggleCategory(category)"
-          />
-          {{ category.name }}
-        </label>
+        <div
+          class="flex items-center accent-blue-500 bg-gray-800 px-2 py-1 rounded-md border"
+          :style="{
+            borderColor: category.color,
+            boxShadow: `0 0 0.2rem ${category.color}`
+          }"
+          v-for="category in categoryArray"
+          v-bind:key="category.id"
+        >
+          <label :for="`checkbox-${category.name}`">
+            <input
+              :id="`checkbox-${category.name}`"
+              type="checkbox"
+              :checked="selectedCategoriesFilter.includes(category)"
+              @change="toggleCategory(category)"
+            />
+            {{ category.name }}
+          </label>
+        </div>
       </div>
-    </div>
+    </Transition>
 
     <div class="flex justify-between lg:w-2/3 md:2/3 w-full items-center">
       <label
@@ -309,5 +311,16 @@ const changeVisionMode = (note: NoteWatch) => {
 }
 .active {
   @apply bg-blue-500 text-white transition-all duration-200 ease-in;
+}
+
+.categories-enter-from,
+.categories-enter-active,
+.categories-enter-to {
+  @apply animate-slide-in-top animate-duration-300 animate-linear;
+}
+.categories-leave-from,
+.categories-leave-active,
+.categories-leave-to {
+  @apply animate-slide-out-top animate-duration-300 animate-linear;
 }
 </style>
