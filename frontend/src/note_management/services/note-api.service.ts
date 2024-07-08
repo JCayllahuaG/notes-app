@@ -20,4 +20,10 @@ export class NoteService{
       delete(id:number):Promise<string> {
         return http.delete(`/notes/${id}`);
       }
+      addCategory(id:number, categoryId:number):Promise<Note> {
+        return http.patch(`/notes/${id}/add-category/${categoryId}`);
+      }
+      removeCategory(id:number, categoryId:number):Promise<Note> {
+        return http.patch(`/notes/${id}/remove-category/${categoryId}`);
+      }
 }
