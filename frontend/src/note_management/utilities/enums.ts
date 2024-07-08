@@ -8,3 +8,7 @@ export enum NoteWatch{
     ARCHIVED,
     ACTIVES,
 }
+export enum TagDialogMode {
+    ASSIGN,
+    WATCH
+}
