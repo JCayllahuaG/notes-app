@@ -19,6 +19,7 @@ const close = () => {
   emits('close');
 };
 const save = () => {
+  updateTitle();
   emits('save-note', localNote.value);
   emits('close');
 };
@@ -37,7 +38,7 @@ watch(
         class="outline-none mt-4 p-2 text-xl border-x border-t border-gray-400 rounded-t-md"
         contenteditable="true"
       >
-        {{ localNote.title }}
+        {{ localNote.title === '' ? 'Title Here' : localNote.title }}
       </h2>
       <textarea
         class="outline-none bg-transparent p-2 min-h-60 max-h-96 text-sm border-x border-b border-gray-400 rounded-b-md"
@@ -89,3 +90,4 @@ watch(
     </div>
   </dialog>
 </template>
+<style scoped></style>
