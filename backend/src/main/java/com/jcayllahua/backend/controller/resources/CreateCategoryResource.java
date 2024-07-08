@@ -1,4 +1,11 @@
 package com.jcayllahua.backend.controller.resources;
 
-public record CreateCategoryResource(String name, String color) {
+import jakarta.validation.constraints.NotBlank;
+
+public record CreateCategoryResource(
+
+        @NotBlank
+        String name,
+        @NotBlank
+        String color) {
 }
