@@ -1,9 +1,23 @@
 <script lang="ts" setup>
 import { Note } from '../model/Note';
+import { watch, ref } from 'vue';
 let props = defineProps<{
   note: Note;
 }>();
-const emits = defineEmits(['delete-note', 'click-note', 'archive-note', 'unarchive-note']);
+
+const emits = defineEmits(['delete-note', 'click-note', 'archive-note', 'unarchive-note', 'tags']);
+let localNote = ref(props.note);
+
+watch(
+  () => props.note,
+  (newNote: Note) => {
+    console.log('Note Updated', localNote.value);
+    console.log('New Note', newNote);
+    localNote.value = { ...newNote }; // Update localNote with the new value
+  }
+);
+
+//emits
 const deleteNote = () => {
   emits('delete-note', props.note.id);
 };
@@ -16,23 +30,49 @@ const unarchiveNote = () => {
 </script>
 <template>
   <div class="flex w-full max-h-48 flex-row animate-fade-in-down animate-duration-300">
+    <div class="w-1/6 flex flex-col justify-center items-center">
+      <button
+        title="Tag"
+        @click="emits('tags', localNote)"
+        class="w-fit h-fit p-2 hover:bg-gray-800 hover:text-opacity-100 hover:scale-110 text-yellow-500 text-opacity-70 rounded-full transition-all duration-300 ease-linear"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="size-5 hover:scale-125 transition-transform duration-300 ease-linear"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z"
+          />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" />
+        </svg>
+      </button>
+    </div>
     <div
-      @click="emits('click-note', props.note)"
-      class="w-5/6 p-3 border gap-3 border-gray-400 rounded-md drop-shadow-xl hover:scale-105 transition-all duration-200 ease-linear"
+      @click="emits('click-note', localNote)"
+      class="w-full p-3 border gap-3 border-gray-400 rounded-md drop-shadow-xl hover:scale-105 transition-all duration-200 ease-linear"
     >
       <h3 class="max-h-16">
-        {{ props.note.title }}
+        {{ localNote.title }}
       </h3>
       <p class="text-sm max-h-20 overflow-hidden">
-        {{ props.note.content }}
+        {{ localNote.content }}
       </p>
-      <chip-category
-        v-for="category in note.categories"
-        :key="category.id"
-        :text="category.name"
-        :color="category.color"
-        :active="false"
-      ></chip-category>
+      <div class="flex flex-wrap gap-2 h-fit">
+        <chip-category
+          class="mt-2"
+          v-for="category in localNote.categories"
+          :key="category.id"
+          :text="category.name"
+          :color="category.color"
+          :active="false"
+        ></chip-category>
+      </div>
     </div>
 
     <div class="w-1/6 flex flex-col justify-center items-center">
