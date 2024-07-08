@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer base {
+  h1 {
+    @apply text-3xl font-semibold text-zinc-200;
+  }
+  .title {
+    @apply text-2xl font-semibold text-zinc-200;
+  }
+  html {
+    font-family: 'Nunito', system-ui, sans-serif;
+  }
+}
+* {
+  box-sizing: border-box;
+  --background-color: #1a202c;
+  --text-color: #e2e8f0;
+}
+#app {
+  box-sizing: border-box;
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  @apply flex-col lg:flex-row md:flex-row sm:flex-row;
+}
+
+body {
+  height: 100vh;
+  box-sizing: border-box;
+  margin: 0px;
+  min-height: 100vh;
+  font-weight: normal;
+  padding: 0;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
