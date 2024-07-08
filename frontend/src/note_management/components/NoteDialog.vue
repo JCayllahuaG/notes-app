@@ -30,11 +30,7 @@ watch(
 );
 </script>
 <template>
-  <dialog
-    v-if="visible"
-    @click.self="close"
-    class="flex py-5 justify-center bg-[#1a202c] bg-opacity-10 w-full h-full backdrop-blur-sm text-gray-300 animate-zoom-in animate-duration-300"
-  >
+  <dialog v-if="visible" @click.self="close" class="py-5 dialog">
     <div class="flex flex-col w-1/2 h-fit p-5 rounded-md">
       <h2
         id="title"
