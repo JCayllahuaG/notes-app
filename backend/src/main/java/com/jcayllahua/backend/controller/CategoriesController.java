@@ -5,6 +5,7 @@ import com.jcayllahua.backend.controller.resources.CreateCategoryResource;
 import com.jcayllahua.backend.model.entity.Category;
 import com.jcayllahua.backend.model.validations.ObjectValidator;
 import com.jcayllahua.backend.service.CategoryService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,10 +26,12 @@ public class CategoriesController {
         this.validator = validator;
     }
 
+    @Operation(summary = "Get all categories")
     @GetMapping
     public ResponseEntity<List<CategoryResource>> getCategories() {
         return ResponseEntity.ok(CategoryResource.fromEntity(categoryService.findAll()));
     }
+    @Operation(summary = "Get category by id")
     @PostMapping
     public ResponseEntity<CategoryResource> createCategory(@RequestBody CreateCategoryResource request) {
 
@@ -38,11 +41,13 @@ public class CategoriesController {
 
         return ResponseEntity.ok(CategoryResource.fromEntity(categoryService.save(category)));
     }
+    @Operation(summary = "Update category by id")
     @PutMapping("/{id}")
     public ResponseEntity<CategoryResource> updateCategory(@PathVariable Long id, @RequestBody CreateCategoryResource categoryData) {
         Category category = new Category(categoryData.name(), categoryData.color());
         return ResponseEntity.ok(CategoryResource.fromEntity(categoryService.update(id, category)));
     }
+    @Operation(summary = "Delete category by id")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCategoryById(@PathVariable Long id) {
         return ResponseEntity.ok(categoryService.delete(id));
