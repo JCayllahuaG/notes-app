@@ -4,10 +4,9 @@
 
 1. [Introduction](#introduction)
 2. [Technologies Used](#technologies-used)
-3. [Features](#features-implemented)
-4. [App Setup](#setup-instructions)
-5. [App Run](#running-the-application)
-6. [Test App](#testing-application)
+3. [App Setup](#setup-instructions)
+4. [App Run](#running-the-application)
+5. [Test App](#testing-application)
 
 
 ## Introduction 
@@ -26,11 +25,6 @@ This repository contains the implementation of a full-stack web application for 
   - PostgreSQL 16.3 as Database
   - Docker for containerization
   - OpenAPI for API documentation
-
-## Features Implemented 
-
-- Phase 1 ✅
-- Phase 2 ✅
 
 ## Setup Instructions
 
